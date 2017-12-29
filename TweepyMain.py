@@ -1,6 +1,8 @@
 import tweepy
 import random
 
+from tweepy import TweepError
+
 print(sys.version)
 print(" ")
 # file must contain keys by order and finish with a \n(enter)
@@ -51,3 +53,21 @@ for i in range (2000,2005):
 
 
 print("\nforam encontados {} {}".format(contador,word))
+
+# Function that finds a certain tweet that contains a certain word
+def findTweetByWord(str):
+    """
+    Function that finds a certain tweet that contains a certain word
+    :param str: String with the that the tweet must contain
+    :return: Integer with the tweet ID
+    """
+    catched=True
+    while(catched):
+        next_status=random.randint(0,9999999999)
+        try:
+            text=api.get_status(next_status).text
+            if(str in text):
+                catched=False
+                return next_status
+        except tweepy.TweepError:
+            print("ID: ",next_status," unavailable")
