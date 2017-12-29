@@ -51,19 +51,18 @@ for i in range (2000,2005):
             break
 
 
-
 print("\nforam encontados {} {}".format(contador,word))
 
-# Function that finds a certain tweet that contains a certain word
-def findTweetByWord(str):
+# Function that finds a random tweet that contains a certain word
+def findRandomTweetByWord(str):
     """
     Function that finds a certain tweet that contains a certain word
     :param str: String with the that the tweet must contain
-    :return: Integer with the tweet ID
+    :return: Integer with the tweet ID or -1 if not found
     """
     catched=True
     while(catched):
-        next_status=random.randint(0,9999999999)
+        next_status=random.randint(0,api.search("\S").since_id)
         try:
             text=api.get_status(next_status).text
             if(str in text):
@@ -71,3 +70,12 @@ def findTweetByWord(str):
                 return next_status
         except tweepy.TweepError:
             print("ID: ",next_status," unavailable")
+
+# Finds the latest tweet that contains a certain word or a sequence of words
+def findLatestTweetByWord(str):
+    """
+    Finds the latest tweet that contains a certain word or sequence of words
+    :param str: String with the word/sequence of words being found
+    :return: Integer with the tweet ID that contains the word/sequence of words or -1 if not found
+    """
+    return api.search(str).since_id;
