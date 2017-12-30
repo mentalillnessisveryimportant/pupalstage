@@ -61,8 +61,11 @@ def findRandomTweetByWord(str):
     :return: Integer with the tweet ID or -1 if not found
     """
     catched=True
-    while(catched):
+    MAX_REQUESTS=15
+    requests=0
+    while(catched and requests<MAX_REQUESTS):
         next_status=random.randint(0,api.search("\S").since_id)
+        requests+=1
         try:
             text=api.get_status(next_status).text
             if(str in text):
