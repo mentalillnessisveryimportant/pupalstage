@@ -1,5 +1,6 @@
 import tweepy
 import random
+import time
 
 from tweepy import TweepError
 
@@ -82,3 +83,65 @@ def findLatestTweetByWord(str):
     :return: Integer with the tweet ID that contains the word/sequence of words or -1 if not found
     """
     return api.search(str).since_id;
+
+# Posts a tweet
+def post(str):
+    """
+    Posts a tweet with a certain content
+    :param str: String with the tweet content
+    :return: Boolean true if the tweet was successful, false if not
+    """
+    try:
+        api.update_status(str)
+        return True
+    except tweepy.TweepError:
+        return False
+
+# Retweets a certain tweet with a certain ID
+def retweet(status_id):
+    """
+    Retweets a certain tweet with a certain ID
+    :param status_id: Integer with the tweet ID being retweeted
+    :return: Boolean true if the retweet was successful, false if not
+    """
+    try:
+        api.retweet(status_id)
+        return True
+    except tweepy.TweepError:
+        return False
+
+def happy_new_year(str):
+    try:
+        HNW=" Happy New Year "
+        AT="@"
+        EXCLAMATION=" !"
+        request=0
+        REQUEST_LIMIT=20
+        user=api.get_user(str)
+        user_followers= get_all_followers(str)
+        post(AT+user.screen_name+HNW+user.name+EXCLAMATION)
+        for follower in user_followers:
+            if request==REQUEST_LIMIT:
+                request=0
+                time.sleep(60)
+            if not follower.protected:
+                request+=1
+                post(AT+follower.screen_name+HNW+follower.name+EXCLAMATION)
+    except tweepy.TweepError:
+        print("No Happy New Year :(")
+
+# Gets all followers of a user
+def get_all_followers(user):
+    """
+    Gets all followers of a certain user
+    :param user: User @ that is going to get all followers
+    :return: Array with all followers of the user, or None if a problem happened
+    """
+    try:
+        followers=[]
+        for page in tweepy.Cursor(api.followers,screen_name=user).pages():
+            followers.extend(page)
+            time.sleep(60)
+        return followers
+    except tweepy.TweepError:
+        return None
