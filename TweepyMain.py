@@ -145,3 +145,17 @@ def get_all_followers(user):
         return followers
     except tweepy.TweepError:
         return None
+
+# Gets an array with all trends occurring on a certain WOEID
+def get_trends_woeid(id):
+    """
+    Gets an array with all trends occurring on a certain WOEID (Yahoo GEO ID)
+    :param id: Integer with the WOEID (Yahoo GEO ID) of the place
+    :return: Array with all trends occurring on the place or None if an error occurred or no trends found
+    """
+    try:
+        trends_json=api.trends_place(id)
+        trends=(trends_json[0])['trends']
+        return [trend['name'] for trend in trends]
+    except tweepy.TweepError:
+        return None
