@@ -4,10 +4,9 @@ import time
 
 from tweepy import TweepError
 
-print(sys.version)
-print(" ")
+FILE_KEYS="keys.txt"
 # file must contain keys by order and finish with a \n(enter)
-file = open("chave.txt","r")
+file = open(FILE_KEYS,"r")
 
 key=['null']*4
 i=0
