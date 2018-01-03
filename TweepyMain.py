@@ -53,6 +53,31 @@ for i in range (2000,2005):
 
 print("\nforam encontados {} {}".format(contador,word))
 
+
+# Function that gets all available Twitter API accounts under a certain file name
+def get_available_accounts(file_name):
+    """
+    Function that gets all available Twitter API accounts under a certain file name
+    <br>File must follow the same structure as the file that has the OATH keys and tokens for the login
+    :param file_name: String with the file name that contains all OAUTH keys and tokens of the accounts
+    :return: Array with all the Tweepy API of the accounts
+    """
+    accounts=[]
+    keys=['null']*4
+    fileInfo=open(file_name, 'r')
+    tokens=0
+    for line in fileInfo:
+        keys[tokens]=line[0:-1]
+        tokens+=1
+        if tokens==4:
+            tokens=0
+            authX=tweepy.OAuthHandler(keys[0],keys[1])
+            authX.set_access_token(keys[2],keys[3])
+            accounts.append(tweepy.API(authX))
+    fileInfo.close()
+    return accounts
+
+
 # Function that finds a random tweet that contains a certain word
 def findRandomTweetByWord(str):
     """
