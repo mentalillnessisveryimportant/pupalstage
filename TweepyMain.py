@@ -2,6 +2,7 @@ import tweepy
 import random
 import time
 
+from builtins import str
 from tweepy import TweepError
 
 FILE_KEYS="keys.txt"
@@ -183,3 +184,31 @@ def get_trends_woeid(id):
         return [trend['name'] for trend in trends]
     except tweepy.TweepError:
         return None
+
+# Gets the location and woeid from a certain Twitter Trends JSON
+def get_location_and_woeid_json(json):
+    """
+    Gets the location and woeid from a certain Twitter Trends JSON
+    :param json: JSON with the Twitter trend JSON object
+    :return: Array with the location and woeid of the trend location
+    """
+    array=[]
+    replaced_splitted_json=replace_string(json.get('locations').__str__(),{'{','}','[',']',':','\'',','}).split(" ")
+    array.append(replaced_splitted_json[1])
+    array.append(replaced_splitted_json[3])
+    return array
+
+
+# Replaces all characters/Strings in a certain String
+def replace_string(str, array):
+    """
+    Replaces all characters/Strings in a certain String
+    :param str: String being replaced
+    :param array: Array with all characters/Strings being replaced
+    :return: String with all replaced characters/Strings by an empty String ("")
+    """
+    new_str=str.__str__()
+    EMPTY_STRING=""
+    for sequence in array:
+        new_str=new_str.replace(sequence,EMPTY_STRING)
+    return new_str
