@@ -1,59 +1,11 @@
 import tweepy
 import random
 import time
-
+from multiprocessing import Process
+import threading
+import queue
 from builtins import str
 from tweepy import TweepError
-
-FILE_KEYS="keys.txt"
-# file must contain keys by order and finish with a \n(enter)
-file = open(FILE_KEYS,"r")
-
-key=['null']*4
-i=0
-for line in file:
-    key[i]=line[0:-1]
-    i+=1
-file.close()
-
-#Creates a new Auth to Twitter API
-auth = tweepy.OAuthHandler(key[0], key[1])
-
-#Sets the tokens for the api access
-auth.set_access_token(key[2], key[3])
-
-#Creates a new API with the auth
-api = tweepy.API(auth)
-
-
-# Gets all the tweets from the user
-#public_tweets=api.home_timeline()
-
-#for tweet in public tweets:
- #   tweet.destroy()
-   # print(tweet.text)
-
-#api.retweet(666)
-
-#escreve os tweets dentro da range e da skip aos que nao exitem ou sao privados
-#tb procura pela palavra have !
-word='have'
-contador=0
-for i in range (2000,2005):
-    while True:
-        try:
-            var=api.get_status(i).text
-            print(var)
-            if word in var:
-                contador += 1
-            break
-        except:
-            print("----------Oops!------------ ")
-            break
-
-
-print("\nforam encontados {} {}".format(contador,word))
-
 
 # Function that gets all available Twitter API accounts under a certain file name
 def get_available_accounts(file_name):
@@ -101,7 +53,7 @@ def findRandomTweetByWord(str):
             print("ID: ",next_status," unavailable")
 
 # Finds the latest tweet that contains a certain word or a sequence of words
-def findLatestTweetByWord(str):
+def findLatestTweetByWord(str,api):
     """
     Finds the latest tweet that contains a certain word or sequence of words
     :param str: String with the word/sequence of words being found
@@ -110,7 +62,7 @@ def findLatestTweetByWord(str):
     return api.search(str).since_id;
 
 # Posts a tweet
-def post(str):
+def post(str,api):
     """
     Posts a tweet with a certain content
     :param str: String with the tweet content
@@ -123,7 +75,7 @@ def post(str):
         return False
 
 # Retweets a certain tweet with a certain ID
-def retweet(status_id):
+def retweet(status_id,api):
     """
     Retweets a certain tweet with a certain ID
     :param status_id: Integer with the tweet ID being retweeted
@@ -212,3 +164,57 @@ def replace_string(str, array):
     for sequence in array:
         new_str=new_str.replace(sequence,EMPTY_STRING)
     return new_str
+
+def get_tweets_text(low,high,api):
+    """
+    Gets tweets in order from low to high or "low" ammount of random tweets
+    :param low: defines the starting number
+    :param top: if False will give random tweets
+    :param api: The tweepy api
+    :return:
+    """
+    if high:
+        tweets_ids=range(low,high)
+    else:
+        tweets_ids=[]
+        for i in range(0,low):
+            tweets_ids.append(random.randint(0,10**10))
+
+    tweets_text=[]
+    for i in tweets_ids:
+        while True:
+            try:
+                tweets_text.append(api.get_status(i).text)
+                break
+            except:
+                tweets_text.append("ERROR GUETING TWEET")
+                break
+    return tweets_text
+
+
+users = get_available_accounts("KEYS_TEMPLATE.txt")
+
+#print(users[0].get_status(findLatestTweetByWord("sup",users[0])).text)# searches for tweets withs the word
+n_tweets=10
+n_threads=10
+tempo=time.time()
+memory=[]
+# memory=get_tweets_text(n_tweets,False,users[0])
+que= queue.Queue()
+n_tweets_multi=int(n_tweets/n_threads)
+threads=[]
+for i in range(n_threads):
+    #thread = threading.Thread(target=get_tweets_text,args=(n_tweets_multi,False,users[0]))
+
+    thread = threading.Thread( target = lambda q, arg1,arg2,arg3: q.put(get_tweets_text(arg1,arg2,arg3)), args=(que,n_tweets_multi, False, users[0]))
+    threads.append(thread)
+    thread.start()
+for thread in threads:
+    thread.join()
+
+while not que.empty():
+    memory.append(que.get())
+
+print("It took {}s to get {} tweets".format(time.time()-tempo,n_tweets))
+for i in range(len(memory)):
+    print(memory[i][0])
